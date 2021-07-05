@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e44a452b-383b-4de3-9ab9-a8a23e64dc79" basePath="/timezone">
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="e38cea02-ee97-4189-9378-d1cc3b2af83d" basePath="/api/timezone" >
+		<http:request-connection host="worldtimeapi.org" />
+	</http:request-config>
+	<flow name="MUnit-demoFlow" doc:id="14daae98-e786-482e-a2ca-197c4e4f1670" >
+		<http:listener doc:name="Listener" doc:id="62546583-3f7b-4025-95b0-78cf322ec98b" config-ref="HTTP_Listener_config" path="/{region}/{city}"/>
+		<logger level="INFO" doc:name="Logger " doc:id="c4b5df50-0d70-44ff-80a0-d2d1859e0f31" message="#[(attributes.uriParams.region default '') ++ ' ' ++ (attributes.uriParams.city default '')]"/>
+		<http:request method="GET" doc:name="Request" doc:id="09dc2da6-0778-4449-9e44-7eb81c0e9ba4" config-ref="HTTP_Request_configuration" path="/{region}/{city}">
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"region" : attributes.uriParams.region,
+	"city": attributes.uriParams.city
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="efabb1b1-bf61-4d6d-bbb8-55bd94be90fa" message="#[payload]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="6fdb1825-cf72-4d18-819c-5ff4c9067978" message="flow completed"/>
+	</flow>
+</mule>
